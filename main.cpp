@@ -6,24 +6,25 @@ using namespace sf;
 using namespace std;
 int main()
 {
-    bool is_btn_down_released = true;
+    // флаги для обработки нажатий кнопок
     bool is_btn_left_released = true;
     bool is_btn_right_released = true;
     bool is_btn_rotate_released = true;
-    double time = 300;
-    double time_normal = 300;
-    double time_fast = 100;
+    
+    double time = 300; // текущее время в мс которое игра ждет для следующей итерации игрового цикла
+    double time_normal = 300; // нормальное значение времени
+    double time_fast = 100; // ускоренное значение времени
     RenderWindow window(VideoMode(700, 700), "Tetris");
-    window.setFramerateLimit(30);
-    Game game(&window);
-    game.start();
-    Clock clock;
-    View view;
-    view = window.getView();
+    window.setFramerateLimit(30); // ограничитель кадров в секунду
+    Game game(&window); // создание игры
+    game.start(); // начало игры
+    Clock clock; 
     Texture back_texture;
     Sprite back_sprite;
+    // загрузка фона
     back_texture.loadFromFile("img/background.png");
     back_sprite.setTexture(back_texture);
+
     while (window.isOpen())
     {
         Event event;
@@ -35,6 +36,7 @@ int main()
                 game.save();
                 return 0;
             }
+            // если пользователь нажимает кнопку "стрелка вниз", то элемент падает с утроенной скоростью
             if (Keyboard::isKeyPressed(Keyboard::Down))
             {
                 time = time_fast/2;
@@ -89,8 +91,7 @@ int main()
                 }
             }
         }
-        double k = (game.get_score() == 0) ? 1 : game.get_score();
-        time_normal = 300 -k/10;
+     
         window.clear();
         window.draw(back_sprite);
         if (clock.getElapsedTime().asMilliseconds() > time)
