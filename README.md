@@ -1,5 +1,7 @@
 ## Tetris game
 
+![Gameplay](https://github-misc.s3.amazonaws.com/gameplay.png)
+
 A very simple and robust implementation of Tetris with C++ and SFML
 
 
