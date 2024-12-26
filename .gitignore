@@ -1,2 +1,4 @@
-main
+Main
 record.txt
+_deps/
+build/
