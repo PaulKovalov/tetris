@@ -5,7 +5,7 @@ Element::Element(std::vector<std::pair<int, int>> el, int type, int pos_x, int p
     this->el = el;
     this->type = type;
     texture.loadFromFile("img/el" + std::to_string(type) + ".jpg");
-    sprite.setTexture(texture);
+    sprite = new sf::Sprite(texture);
     this->pos_x = pos_x;
     this->pos_y = pos_y;
 }

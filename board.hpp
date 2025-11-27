@@ -3,6 +3,8 @@
 #define SFML_NO_DEPRECATED_WARNINGS
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
@@ -24,9 +26,9 @@ class Game {
     int current_score, next_element, best_score;
     // Font and text objects for scores and messages.
     Font font;
-    Text score_text;
+    Text *score_text;
     Texture texture, preview_texture, final_texture;
-    Sprite sprite, preview_sprite, final_sprite;
+    Sprite *sprite, *preview_sprite, *final_sprite;
 
    public:
     bool is_final;

@@ -8,7 +8,7 @@ class Element {
    public:
     std::vector<std::pair<int, int>> el;
     sf::Texture texture;
-    sf::Sprite sprite;
+    sf::Sprite *sprite;
     int type;
     int pos_x, pos_y;
     Element(std::vector<std::pair<int, int>> el, int type, int pos_x, int pos_y);

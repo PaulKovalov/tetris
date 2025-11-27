@@ -19,12 +19,15 @@ Game::Game(sf::RenderWindow *window) {
 
 void Game::init_gui(sf::RenderWindow *window) {
     this->window = window;
-    font.loadFromFile("comic_sans.ttf");
-    score_text.setFont(font);
-    score_text.setCharacterSize(28);
-    score_text.setPosition(540, 400);
-    score_text.setColor(sf::Color::Blue);
-    preview_sprite.setPosition(540, 85);
+    font.openFromFile("comic_sans.ttf");
+    score_text = new sf::Text(font, "", 28);
+    score_text->setPosition({540, 400});
+    score_text->setFillColor(sf::Color::Blue);
+    preview_sprite = new sf::Sprite(preview_texture);
+    preview_sprite->setPosition({540, 85});
+
+    sprite = new sf::Sprite(texture);
+    final_sprite = new sf::Sprite(final_texture);
 }
 
 void Game::next() {
@@ -182,7 +185,7 @@ void Game::draw() {
     // If the game has ended, depending on the player's state
     // either winning or losing sprite will be drawn.
     if (is_final) {
-        window->draw(final_sprite);
+        window->draw(*final_sprite);
     }
     // Game has not ended yet case.
     else {
@@ -191,30 +194,30 @@ void Game::draw() {
             int y = current_element->el[i].first;
             x *= 50;
             y *= 50;
-            current_element->sprite.setPosition(Vector2f(x, y));
-            window->draw(current_element->sprite);
+            current_element->sprite->setPosition(Vector2f(x, y));
+            window->draw(*current_element->sprite);
         }
         string score = to_string(current_score);
         if (current_score > best_score) {
             score = to_string(current_score) + "\nNew high score!";
         }
-        score_text.setString(score);
+        score_text->setString(score);
         preview_texture.loadFromFile("img/preview_" + to_string(next_element) + ".png");
-        preview_sprite.setTexture(preview_texture, true);
+        preview_sprite->setTexture(preview_texture, true);
         for (int i = 0; i < 14; ++i) {
             for (int j = 0; j < 10; ++j) {
                 if (board[i][j]) {
                     int x = j * 50;
                     int y = i * 50;
                     texture.loadFromFile("img/el" + to_string(board[i][j]) + ".jpg");
-                    sprite.setTexture(texture);
-                    sprite.setPosition(Vector2f(x, y));
-                    window->draw(sprite);
+                    sprite->setTexture(texture);
+                    sprite->setPosition(Vector2f(x, y));
+                    window->draw(*sprite);
                 }
             }
         }
-        window->draw(score_text);
-        window->draw(preview_sprite);
+        window->draw(*score_text);
+        window->draw(*preview_sprite);
     }
 }
 
@@ -318,5 +321,5 @@ void Game::load_record() {
 
 void Game::set_final_sprite(const string& s) {
     final_texture.loadFromFile(s);
-    final_sprite.setTexture(final_texture);
+    final_sprite->setTexture(final_texture);
 }
