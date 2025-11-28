@@ -9,6 +9,7 @@ using namespace sf;
 using namespace std;
 
 int main() {
+    srand(time(NULL));
     bool is_btn_left_released = true;
     bool is_btn_right_released = true;
     bool is_btn_rotate_released = true;

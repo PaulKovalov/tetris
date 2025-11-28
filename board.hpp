@@ -21,61 +21,64 @@ class Game {
     // Coordinates array.
     vector<vector<int>> board;
     // Pointer to the element currently controlled by player.
-    Element *current_element;
+    std::unique_ptr<Element> current_element;
     RenderWindow *window;
-    int current_score, next_element, best_score;
     // Font and text objects for scores and messages.
-    Font font;
-    Text *score_text;
-    Texture preview_texture, final_texture;
-    Sprite *preview_sprite, *final_sprite;
+    Font score_font;
+    std::unique_ptr<Text> score_text;
+    Texture preview_texture, won_texture, lost_texture;
 
-    const static int BOARD_HEIGHT = 13;
-    const static int BOARD_WIDTH = 9;
+    const static int BOARD_HEIGHT = 14;
+    const static int BOARD_WIDTH = 10;
+
+    int current_score, next_element, best_score;
+
+    std::unique_ptr<Sprite> preview_sprite, final_sprite;
+
+    // Textures used to draw preview elements.
+    vector<Texture> preview_textures;
+    // Textures used to draw elements on the board.
+    vector<Texture> textures;
+    // Performs clockwise rotation of the current element, without checking if
+    // this is a valid move.
+    void _rotate(Element*);
+    // Moves the element 1 position left, without checking if this is a
+    // valid move.
+    void _left(Element*);
+    // Moves the element 1 position right, without checking if this is a
+    // valid move.
+    void _right(Element*);
+    // Moves the element 1 position down, without checking if this is a
+    // valid move.
+    void _down(Element*);
+    // Checks if the position of the element is valid, e.g. is withing the
+    // boundaries of the board and is not intersecting with any other element
+    // on the board.
+    bool _valid_position(const Element*);
+
    public:
-    bool is_final;
+    bool is_final = false;
 
     // Initialized GUI, loads record data.
     Game(RenderWindow *window);
-
-    // Initializes GUI elements.
-    void init_gui(RenderWindow *window);
 
     // Makes the next iteration of the game loop, which is either move current element down, or generate
     // a new one.
     void next();
 
-    // Checks if there are assembled rows. Removes assembled rows,
-    // shifts elements laying on the removed rows down. If all rows
-    // were removed, sets win flag.
-    void check_win();
+    // Checks if the game is won or lost, updates final sprite accordingly.
+    void check_end_of_game();
 
-    // Shifts current element 1 position below.
-    void move_down(int i);
+    // Removes filled rows.
+    void eliminate_rows();
 
     // Checks & moves the current element, if the move is possible.
     void left();
-
-    // Moves the element 1 position left, without checking if this is a
-    // valid move.
-    void _left(Element*);
     
     // Checks & moves the current element, if the move is possible.
     void right();
 
-    // Moves the element 1 position right, without checking if this is a
-    // valid move.
-    void _right(Element*);
-
     void rotate();
-
-    // Performs clockwise rotation of the current element. 
-    void _rotate(Element*);
-
-    // Checks if the position of the element is valid, e.g. is withing the
-    // boundaries of the board and is not intersecting with any other element
-    // on the board.
-    bool _valid_position(Element*);
 
     // Draws all board with all elements present on it.
     void draw();
@@ -86,18 +89,14 @@ class Game {
     // Initializes game variables. Generates initial element.
     void start_game();
 
-    // Generates next element, and generates preview for the next element.
-    Element *generate_element();
+    // Updates current element to the next element.
+    void update_current_element();
 
-    // Formula for generatin the id of the next element.
-    int gen_next_element_id();
+    void create_next_element();
+
     int get_score();
 
     // Saves current score to record.txt file if current score
     // is higher than record.
     void write_record();
-
-    void load_record();
-    
-    void set_final_sprite(const string& s);
 };
