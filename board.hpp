@@ -27,9 +27,11 @@ class Game {
     // Font and text objects for scores and messages.
     Font font;
     Text *score_text;
-    Texture texture, preview_texture, final_texture;
-    Sprite *sprite, *preview_sprite, *final_sprite;
+    Texture preview_texture, final_texture;
+    Sprite *preview_sprite, *final_sprite;
 
+    const static int BOARD_HEIGHT = 13;
+    const static int BOARD_WIDTH = 9;
    public:
     bool is_final;
 
@@ -51,13 +53,29 @@ class Game {
     // Shifts current element 1 position below.
     void move_down(int i);
 
-    // Moves current element 1 position left.
+    // Checks & moves the current element, if the move is possible.
     void left();
 
-    // Moves current element 1 position right.
+    // Moves the element 1 position left, without checking if this is a
+    // valid move.
+    void _left(Element*);
+    
+    // Checks & moves the current element, if the move is possible.
     void right();
 
+    // Moves the element 1 position right, without checking if this is a
+    // valid move.
+    void _right(Element*);
+
     void rotate();
+
+    // Performs clockwise rotation of the current element. 
+    void _rotate(Element*);
+
+    // Checks if the position of the element is valid, e.g. is withing the
+    // boundaries of the board and is not intersecting with any other element
+    // on the board.
+    bool _valid_position(Element*);
 
     // Draws all board with all elements present on it.
     void draw();

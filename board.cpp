@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <memory>
 
 using namespace std;
 
@@ -25,8 +26,6 @@ void Game::init_gui(sf::RenderWindow *window) {
     score_text->setFillColor(sf::Color::Blue);
     preview_sprite = new sf::Sprite(preview_texture);
     preview_sprite->setPosition({540, 85});
-
-    sprite = new sf::Sprite(texture);
     final_sprite = new sf::Sprite(final_texture);
 }
 
@@ -114,70 +113,64 @@ void Game::move_down(int i) {
     }
 }
 
-void Game::left() {
-    // Checks if it is possible to move to the left.
-    bool check_left = true;
-    for (size_t i = 0; i < current_element->el.size(); ++i) {
-        if (current_element->el[i].second - 1 < 0)
-            check_left = false;
-        if (board[current_element->el[i].first][current_element->el[i].second - 1]) {
-            check_left = false;
-        }
+bool Game::_valid_position(Element *element) {
+    for (size_t i = 0; i < element->el.size(); ++i) {
+        if (element->el[i].first > BOARD_HEIGHT || element->el[i].first < 0 || element->el[i].second > BOARD_WIDTH || element->el[i].second < 0)
+            return false;
+        if (board[element->el[i].first][element->el[i].second])
+            return false;
     }
+    return true;
+}
 
-    if (check_left) {
-        for (size_t i = 0; i < current_element->el.size(); ++i) {
-            current_element->el[i].second--;
-        }
-        current_element->pos_x--;
+void Game::_left(Element* element) {
+    for (size_t i = 0; i < element->el.size(); ++i) {
+        element->el[i].second--;
+    }
+    element->pos_x--;
+}
+
+void Game::left() {
+    std::unique_ptr<Element> tmp = make_unique<Element>(current_element->el, current_element->type, current_element->pos_x, current_element->pos_y);
+    _left(tmp.get());
+    if (_valid_position(tmp.get())) {
+        _left(current_element);
     }
 }
 
-void Game::right() {
-    // Checks if it is possible to move to the right.
-    bool check_right = true;
-    for (size_t i = 0; i < current_element->el.size(); ++i) {
-        if (current_element->el[i].second + 1 > 9)
-            check_right = false;
-        if (board[current_element->el[i].first][current_element->el[i].second + 1]) {
-            check_right = false;
-        }
+void Game::_right(Element* element) {
+    for (size_t i = 0; i < element->el.size(); ++i) {
+        element->el[i].second++;
     }
-    if (check_right) {
-        for (size_t i = 0; i < current_element->el.size(); ++i) {
-            current_element->el[i].second++;
-        }
-        current_element->pos_x++;
+    element->pos_x++;
+}
+
+void Game::right() {
+    std::unique_ptr<Element> tmp = make_unique<Element>(current_element->el, current_element->type, current_element->pos_x, current_element->pos_y);
+    _right(tmp.get());
+    if (_valid_position(tmp.get())) {
+        _right(current_element);
+    }
+}
+
+
+void Game::_rotate(Element* element) {
+    for (size_t i = 0; i < element->el.size(); ++i) {
+        element->el[i].second -= element->pos_x;
+        element->el[i].first -= element->pos_y;
+        int t = element->el[i].second;
+        element->el[i].second = element->el[i].first;
+        element->el[i].first = 2 - t;  //[i][j] = e[j][2 - i];
+        element->el[i].second += element->pos_x;
+        element->el[i].first += element->pos_y;
     }
 }
 
 void Game::rotate() {
-    Element *tmp = new Element(current_element->el, current_element->type, current_element->pos_x, current_element->pos_y);
-    bool check_rotate = true;
-    for (size_t i = 0; i < tmp->el.size(); ++i) {
-        tmp->el[i].second -= tmp->pos_x;
-        tmp->el[i].first -= tmp->pos_y;
-        int t = tmp->el[i].second;
-        tmp->el[i].second = tmp->el[i].first;
-        tmp->el[i].first = 2 - t;  //[i][j] = e[j][2 - i];
-        tmp->el[i].second += tmp->pos_x;
-        tmp->el[i].first += tmp->pos_y;
-        if (tmp->el[i].first > 13 || tmp->el[i].first < 0 || tmp->el[i].second > 9 || tmp->el[i].second < 0)
-            check_rotate = false;
-        if (!check_rotate && board[tmp->el[i].first][tmp->el[i].second])
-            check_rotate = false;
-    }
-    delete tmp;
-    if (check_rotate) {
-        for (size_t i = 0; i < current_element->el.size(); ++i) {
-            current_element->el[i].second -= current_element->pos_x;
-            current_element->el[i].first -= current_element->pos_y;
-            int t = current_element->el[i].second;
-            current_element->el[i].second = current_element->el[i].first;
-            current_element->el[i].first = 2 - t;  //[i][j] = e[j][2 - i];
-            current_element->el[i].second += current_element->pos_x;
-            current_element->el[i].first += current_element->pos_y;
-        }
+    std::unique_ptr<Element> tmp = make_unique<Element>(current_element->el, current_element->type, current_element->pos_x, current_element->pos_y);
+    _rotate(tmp.get());
+    if (_valid_position(tmp.get())) {
+        _rotate(current_element);
     }
 }
 
@@ -209,10 +202,11 @@ void Game::draw() {
                 if (board[i][j]) {
                     int x = j * 50;
                     int y = i * 50;
-                    texture.loadFromFile("img/el" + to_string(board[i][j]) + ".jpg");
-                    sprite->setTexture(texture);
-                    sprite->setPosition(Vector2f(x, y));
-                    window->draw(*sprite);
+                    Texture t;
+                    t.loadFromFile("img/el" + to_string(board[i][j]) + ".jpg");
+                    Sprite s(t);
+                    s.setPosition(Vector2f(x, y));
+                    window->draw(s);
                 }
             }
         }
